@@ -1,0 +1,1 @@
+# i wanted explain everything that i have in read me here but i guess its became too professional
