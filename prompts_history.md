@@ -5,3 +5,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 13-04-2026 14:38
 - **Prompt**: activate the journal logger
 
+### 13-04-2026 14:44
+- **Prompt**: generate the code explorer site for this project
+
