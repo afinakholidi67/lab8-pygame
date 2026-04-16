@@ -12,6 +12,8 @@ GLOBAL_MAX_SPEED = 5.0
 DIRECTION_JITTER_CHANCE_PER_SECOND = 2.0
 MAX_DIRECTION_JITTER_DEGREES = 15.0
 THREAT_RADIUS = 80.0
+HUNT_RADIUS = 120.0
+SPAWN_INTERVAL = 3.0
 
 
 Square = dict[str, float | tuple[int, int, int]]
@@ -30,6 +32,8 @@ def create_square() -> Square:
         "size": float(size),
         "max_speed": max_speed,
         "color": (random.randint(50, 255), random.randint(50, 255), random.randint(50, 255)),
+        "dead": 0.0,
+        "life": float(random.uniform(30.0, 180.0)),
     }
 
 
@@ -62,6 +66,10 @@ def apply_random_direction_jitter(square: Square, vx: float, vy: float, dt_secon
     return new_vx, new_vy
 
 
+def rects_overlap(ax: float, ay: float, as_: float, bx: float, by: float, bs: float) -> bool:
+    return ax < bx + bs and ax + as_ > bx and ay < by + bs and ay + as_ > by
+
+
 def update_square(square: Square, all_squares: list[Square], dt_seconds: float) -> None:
     vx = float(square["vx"])
     vy = float(square["vy"])
@@ -70,24 +78,42 @@ def update_square(square: Square, all_squares: list[Square], dt_seconds: float) 
     y = float(square["y"]) + vy
 
     closest_threat = None
-    min_dist = THREAT_RADIUS
+    closest_prey = None
+    min_threat_dist = THREAT_RADIUS
+    min_prey_dist = HUNT_RADIUS
 
     for other in all_squares:
-        if other is square: continue
-        if float(other["size"]) > size:
-            dx = x - float(other["x"])
-            dy = y - float(other["y"])
-            dist = math.hypot(dx, dy)
-            if dist < min_dist:
-                min_dist = dist
-                closest_threat = (dx, dy)
+        if other is square:
+            continue
+        other_size = float(other["size"])
+        dx = float(other["x"]) - x
+        dy = float(other["y"]) - y
+        dist = math.hypot(dx, dy)
+
+        if other_size > size and dist < min_threat_dist:
+            min_threat_dist = dist
+            closest_threat = (-dx, -dy)
+
+        elif other_size < size and dist < min_prey_dist:
+            min_prey_dist = dist
+            closest_prey = (dx, dy, other)
+
     if closest_threat:
         dx, dy = closest_threat
-        if min_dist > 0:
-            target_vx = (dx / min_dist) * float(square["max_speed"])
-            target_vy = (dy / min_dist) * float(square["max_speed"])
-            vx += (target_vx - vx) * 0.1 
-            vy += (target_vy - vy) * 0.1
+        dist = math.hypot(dx, dy)
+        if dist > 0:
+            target_vx = (dx / dist) * float(square["max_speed"])
+            target_vy = (dy / dist) * float(square["max_speed"])
+            vx += (target_vx - vx) * 0.15
+            vy += (target_vy - vy) * 0.15
+    elif closest_prey:
+        dx, dy, prey = closest_prey
+        dist = math.hypot(dx, dy)
+        if dist > 0:
+            target_vx = (dx / dist) * float(square["max_speed"])
+            target_vy = (dy / dist) * float(square["max_speed"])
+            vx += (target_vx - vx) * 0.08
+            vy += (target_vy - vy) * 0.08
     else:
         vx, vy = apply_random_direction_jitter(square, vx, vy, dt_seconds)
 
@@ -112,6 +138,25 @@ def update_square(square: Square, all_squares: list[Square], dt_seconds: float) 
     square["y"] = y
     square["vx"] = vx
     square["vy"] = vy
+    square["life"] = float(square["life"]) - dt_seconds
+def check_kills(squares: list[Square]) -> set[int]:
+    killed = set()
+    for i, a in enumerate(squares):
+        if i in killed:
+            continue
+        for j, b in enumerate(squares):
+            if j <= i or j in killed:
+                continue
+            a_size = float(a["size"])
+            b_size = float(b["size"])
+            if a_size == b_size:
+                continue
+            if rects_overlap(float(a["x"]), float(a["y"]), a_size, float(b["x"]), float(b["y"]), b_size):
+                if a_size > b_size:
+                    killed.add(j)
+                else:
+                    killed.add(i)
+    return killed
 
 
 def draw_square(screen: pygame.Surface, square: Square) -> None:
@@ -130,11 +175,13 @@ def main() -> None:
     clock = pygame.time.Clock()
 
     squares = init_squares()
+    spawn_timer = 0.0
     running = True
 
     while running:
         dt = clock.tick(FPS)
         dt_seconds = dt / 1000.0
+        spawn_timer += dt_seconds
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -143,9 +190,16 @@ def main() -> None:
         for square in squares:
             update_square(square, squares, dt_seconds)
 
-        screen.fill((15, 15, 15))
+        killed = check_kills(squares)
+        squares = [s for i, s in enumerate(squares) if i not in killed and s["life"] > 0]
+        while len(squares) < NUM_SQUARES:
+            squares.append(create_square())
+        if spawn_timer >= SPAWN_INTERVAL:
+            spawn_timer = 0.0
+            squares.append(create_square())
 
-        fps_text = font.render(f"FPS: {clock.get_fps():.1f}", True, (255, 255, 255))
+        screen.fill((15, 15, 15))
+        fps_text = font.render(f"FPS: {clock.get_fps():.1f}  alive: {len(squares)}", True, (255, 255, 255))
         screen.blit(fps_text, (10, 10))
 
         for square in squares:

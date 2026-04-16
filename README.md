@@ -109,3 +109,11 @@ y = float(square["y"])
 ```
 
 That makes movement slightly slower and possibly more natural. Worth trying both and picking whichever feels right.
+
+# Moving Squares Simulation
+
+Just a simple Pygame simulation where squares wander around, hunt each other, and try to survive
+
+I'm fully aware that movement should ideally be implemented using delta time (x += vx * dt_seconds) to keep the speed independent of the frame rate. However, for a small project like this, I decided not to overcomplicate things.
+
+Recalculating all speed constants to work with seconds felt like overkill when it already runs perfectly fine at 60 FPS. I chose to keep the code clean and readable with the standard x += vx approach. It works, it's smooth, and the logic stays simple.

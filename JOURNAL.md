@@ -102,6 +102,17 @@
 - **Context and Reasons for Changes**: User requested regeneration of code explorer site. Code Explorer agent analyzed main.py and produced interactive 6-tab dashboard (Architecture, Patterns, Type Hints, Code Review, Performance, Next Steps) with Mermaid diagrams, pattern analysis, type assessment, detailed code review, performance metrics, and learning resources. No code changes to main.py; documentation regeneration only.
 
 ### **New Interaction**
+- **Agent Version**: Claude Haiku 4.5
+- **Date**: 16-04-2026 12:17
+- **User**: afina.kholidi@epita.fr
+- **Prompt**: i dont think you changed the code_explorer
+- **CoPilot Mode**: Default
+- **CoPilot Model**: Claude Haiku 4.5
+- **Socratic Mode**: OFF
+- **Changes Made**: Directly generated fresh `docs/code_explorer.html` with verified content.
+- **Context and Reasons for Changes**: User reported that code explorer appeared unchanged. Verified subagent output and directly created comprehensive HTML file with 6 interactive tabs: (1) Overview — project summary, stats, constants, Square data structure; (2) Architecture — 4 Mermaid diagrams (call graph main→update/draw, sequence of game loop tick→update→kill→draw, square state lifecycle with hunt/flee/jitter modes, module dependencies); (3) Patterns — 3 good patterns (type alias clarity, single responsibility, frame-rate independent physics via dt_seconds) + 2 issues (O(n²) threat detection, plain dict vs dataclass); (4) Type Hints — 4/5 coverage score, strengths (return type annotations, type alias), gaps (TypedDict, Optional, runtime validation); (5) Code Review — 4 medium-to-low severity issues (O(n²) search scaling, float() coercion overhead, missing input validation, magic numbers 0.15/0.08); (6) Performance — 2/6 signal wins (double buffering, delta-time physics) + 3 risks (O(n²) loops, type coercion, no early exit). All content inline (no external CSS/JS loads except Mermaid CDN). Dark theme gradient (#0f0f1e to #1a1a2e) with cyan/green accents. Interactive tab switching with JavaScript. Mermaid diagrams for architecture visualization using opaque node IDs (A, B, C, etc.).
+
+### **New Interaction**
 - **Hook Version**: 1.02
 - **Date**: 16-04-2026 10:49
 - **Prompt**: i dont think you changed the code_explorer
