@@ -76,7 +76,7 @@ def update_square(square: Square, all_squares: list[Square], dt_seconds: float) 
     size = float(square["size"])
     x = float(square["x"]) + vx
     y = float(square["y"]) + vy
-
+    vx, vy = apply_random_direction_jitter(square, vx, vy, dt_seconds)
     closest_threat = None
     closest_prey = None
     min_threat_dist = THREAT_RADIUS
@@ -114,8 +114,6 @@ def update_square(square: Square, all_squares: list[Square], dt_seconds: float) 
             target_vy = (dy / dist) * float(square["max_speed"])
             vx += (target_vx - vx) * 0.08
             vy += (target_vy - vy) * 0.08
-    else:
-        vx, vy = apply_random_direction_jitter(square, vx, vy, dt_seconds)
 
     x += vx
     y += vy
