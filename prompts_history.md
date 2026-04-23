@@ -26,3 +26,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 16-04-2026 10:49
 - **Prompt**: i dont think you changed the code_explorer
 
+### 23-04-2026 20:01
+- **Prompt**: Rename the existing file in docs/ from code_explorer.html to code_explorer_v1.html, then regenerate the code explorer site for the current codebase.
+
