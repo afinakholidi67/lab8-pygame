@@ -19,7 +19,7 @@ SPAWN_INTERVAL = 3.0
 Square = dict[str, float | tuple[int, int, int]]
 
 
-def create_square() -> Square:
+def create_square(size: float = None) -> Square:
     size = random.randint(MIN_SIZE, MAX_SIZE)
     max_speed = GLOBAL_MAX_SPEED * (MIN_SIZE / size)
     speed = random.uniform(0.5, max_speed)
@@ -36,10 +36,17 @@ def create_square() -> Square:
         "life": float(random.uniform(30.0, 180.0)),
     }
 
-
 def init_squares() -> list[Square]:
-    return [create_square() for _ in range(NUM_SQUARES)]
-
+    squares = []    
+    
+    for _ in range(5):
+        squares.append(create_square(25.0))
+    for _ in range(10):
+        squares.append(create_square(10.0))
+    for _ in range(30):
+        squares.append(create_square(4.0))
+        
+    return squares
 
 def apply_random_direction_jitter(square: Square, vx: float, vy: float, dt_seconds: float) -> tuple[float, float]:
     jitter_probability = min(1.0, DIRECTION_JITTER_CHANCE_PER_SECOND * dt_seconds)
