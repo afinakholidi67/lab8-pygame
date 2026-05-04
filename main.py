@@ -14,6 +14,7 @@ MAX_DIRECTION_JITTER_DEGREES = 15.0
 THREAT_RADIUS = 80.0
 HUNT_RADIUS = 120.0
 SPAWN_INTERVAL = 3.0
+MAX_GROWTH_SIZE = 150.0
 
 
 Square = dict[str, float | tuple[int, int, int]]
@@ -147,21 +148,33 @@ def update_square(square: Square, all_squares: list[Square], dt_seconds: float) 
     square["life"] = float(square["life"]) - dt_seconds
 def check_kills(squares: list[Square]) -> set[int]:
     killed = set()
-    for i, a in enumerate(squares):
-        if i in killed:
-            continue
-        for j, b in enumerate(squares):
-            if j <= i or j in killed:
-                continue
-            if check_collision(a, b):
-                a_size = float(a["size"])
-                b_size = float(b["size"])
-                if a_size > b_size:
-                    killed.add(j)
-                elif b_size > a_size:
-                    killed.add(i)
-                break
+    for i in range(len(squares)):
+        if i in killed: continue
+        for j in range(i + 1, len(squares)):
+            if j in killed: continue
+            
+            sq_a = squares[i]
+            sq_b = squares[j]
+            
+            if check_collision(sq_a, sq_b):
+                size_a = float(sq_a["size"])
+                size_b = float(sq_b["size"])
+                if size_a > size_b:
+                    predator, prey, prey_idx = sq_a, sq_b, j
+                elif size_b > size_a:
+                    predator, prey, prey_idx = sq_b, sq_a, i
+                else:
+                    continue
+                killed.add(prey_idx)
+                growth = float(prey["size"]) * 0.2
+                new_size = min(MAX_GROWTH_SIZE, float(predator["size"]) + growth)
+                predator["size"] = new_size
+                predator["max_speed"] = GLOBAL_MAX_SPEED * (MIN_SIZE / new_size)
+                if prey_idx == i:
+                    break
+                    
     return killed
+
 def draw_square(screen: pygame.Surface, square: Square) -> None:
     x = int(square["x"])
     y = int(square["y"])
