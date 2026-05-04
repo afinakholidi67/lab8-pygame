@@ -75,6 +75,11 @@ def apply_random_direction_jitter(square: Square, vx: float, vy: float, dt_secon
 
 def rects_overlap(ax: float, ay: float, as_: float, bx: float, by: float, bs: float) -> bool:
     return ax < bx + bs and ax + as_ > bx and ay < by + bs and ay + as_ > by
+def check_collision(a: Square, b: Square) -> bool:
+    rect_a = pygame.Rect(a["x"], a["y"], a["size"], a["size"])
+    rect_b = pygame.Rect(b["x"], b["y"], b["size"], b["size"])
+    
+    return rect_a.colliderect(rect_b)
 
 
 def update_square(square: Square, all_squares: list[Square], dt_seconds: float) -> None:
@@ -152,7 +157,7 @@ def check_kills(squares: list[Square]) -> set[int]:
             b_size = float(b["size"])
             if a_size == b_size:
                 continue
-            if rects_overlap(float(a["x"]), float(a["y"]), a_size, float(b["x"]), float(b["y"]), b_size):
+            if check_collision(a, b):
                 if a_size > b_size:
                     killed.add(j)
                 else:
