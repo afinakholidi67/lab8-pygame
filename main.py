@@ -196,9 +196,14 @@ def main() -> None:
             update_square(square, squares, dt_seconds)
 
         killed = check_kills(squares)
-        squares = [s for i, s in enumerate(squares) if i not in killed and s["life"] > 0]
-        while len(squares) < NUM_SQUARES:
-            squares.append(create_square())
+        new_squares = []
+        for i, s in enumerate(squares):
+            if i in killed or s["life"] <= 0:
+                new_squares.append(create_square(s["size"]))
+            else:
+                new_squares.append(s)
+
+        squares = new_squares
         if spawn_timer >= SPAWN_INTERVAL:
             spawn_timer = 0.0
             squares.append(create_square())
