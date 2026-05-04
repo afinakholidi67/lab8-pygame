@@ -15,10 +15,12 @@ THREAT_RADIUS = 80.0
 HUNT_RADIUS = 120.0
 SPAWN_INTERVAL = 3.0
 MAX_GROWTH_SIZE = 150.0
+TRAILS_LENGTH = 30
+TEST_MODE_ON = True
+
 
 
 Square = dict[str, float | tuple[int, int, int]]
-
 
 def create_square(size: float = None) -> Square:
     size = random.randint(MIN_SIZE, MAX_SIZE)
@@ -35,7 +37,9 @@ def create_square(size: float = None) -> Square:
         "color": (random.randint(50, 255), random.randint(50, 255), random.randint(50, 255)),
         "dead": 0.0,
         "life": float(random.uniform(30.0, 180.0)),
+        "history": []
     }
+
 
 def init_squares() -> list[Square]:
     squares = []    
@@ -94,6 +98,11 @@ def update_square(square: Square, all_squares: list[Square], dt_seconds: float) 
     closest_prey = None
     min_threat_dist = THREAT_RADIUS
     min_prey_dist = HUNT_RADIUS
+    center = (x + size/2, y + size/2)
+    square["history"].append(center)
+    if len(square["history"]) > TRAILS_LENGTH:
+        square["history"].pop(0)
+
 
     for other in all_squares:
         if other is square:
@@ -180,7 +189,18 @@ def draw_square(screen: pygame.Surface, square: Square) -> None:
     y = int(square["y"])
     size = int(square["size"])
     color = square["color"]
+    history = square["history"]
+    for i in range(len(history) - 1):
+            p1 = history[i]
+            p2 = history[i+1]          
+            dist = math.hypot(p1[0] - p2[0], p1[1] - p2[1])
+            if dist < WIDTH / 2:
+                pygame.draw.line(screen, color, p1, p2, 2)
+    x = int(square["x"])
+    y = int(square["y"])
+    size = int(square["size"])
     pygame.draw.rect(screen, color, (x, y, size, size))
+
 
 
 def main() -> None:
@@ -223,7 +243,7 @@ def main() -> None:
         fps_text = font.render(f"FPS: {clock.get_fps():.1f}  alive: {len(squares)}", True, (255, 255, 255))
         screen.blit(fps_text, (10, 10))
 
-        for square in squares:
+        for square in squares: 
             draw_square(screen, square)
         pygame.display.flip()
 
