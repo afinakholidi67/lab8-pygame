@@ -125,19 +125,15 @@ def update_square(square: Square, all_squares: list[Square], dt_seconds: float) 
     x += vx
     y += vy
 
-    if x < 0:
-        x = 0
-        vx = abs(vx)
-    elif x + size > WIDTH:
-        x = float(WIDTH - size)
-        vx = -abs(vx)
+    if x > WIDTH:
+        x = -size 
+    elif x < -size:
+        x = float(WIDTH) 
 
-    if y < 0:
-        y = 0
-        vy = abs(vy)
-    elif y + size > HEIGHT:
-        y = float(HEIGHT - size)
-        vy = -abs(vy)
+    if y > HEIGHT:
+        y = -size  
+    elif y < -size:
+        y = float(HEIGHT)
 
     square["x"] = x
     square["y"] = y
