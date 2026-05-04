@@ -153,18 +153,15 @@ def check_kills(squares: list[Square]) -> set[int]:
         for j, b in enumerate(squares):
             if j <= i or j in killed:
                 continue
-            a_size = float(a["size"])
-            b_size = float(b["size"])
-            if a_size == b_size:
-                continue
             if check_collision(a, b):
+                a_size = float(a["size"])
+                b_size = float(b["size"])
                 if a_size > b_size:
                     killed.add(j)
-                else:
+                elif b_size > a_size:
                     killed.add(i)
+                break
     return killed
-
-
 def draw_square(screen: pygame.Surface, square: Square) -> None:
     x = int(square["x"])
     y = int(square["y"])
